@@ -7,14 +7,19 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
+  "engines": {
+    "node": "12.17.1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
     "config": "^4.4.1",
     "express": "^5.2.1",
+    "helmet": "^8.2.0",
     "joi": "^18.2.1",
     "joi-objectid": "^4.0.2",
     "joy": "^0.1.1",
