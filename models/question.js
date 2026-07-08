@@ -88,7 +88,8 @@ const questionSchema = new mongoose.Schema(
 
 questionSchema.index({ subject_id: 1, topic_id: 1, difficulty: 1 });
 
-const Question = mongoose.model("Question", questionSchema);
+const Question =
+  mongoose.models.Question || mongoose.model("Question", questionSchema);
 
 function validateQuestion(question) {
   const schema = Joi.object({

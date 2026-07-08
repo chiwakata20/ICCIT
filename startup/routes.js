@@ -41,6 +41,8 @@ const studentBadges = require("../routes/studentBadges.js");
 const certificates = require("../routes/certificates.js");
 const forumTopics = require("../routes/forumTopics.js");
 const forumPosts = require("../routes/forumPosts.js");
+const mockExams = require("../routes/mockExams.js");
+const mockExamSubmissions = require("../routes/mockExamSubmissions.js");
 const error = require("../middleware/error");
 
 
@@ -80,6 +82,8 @@ module.exports = function (app) {
   app.use("/api/libraryResources", libraryResources);
 
   app.use("/api/messages", messages);
+  app.use("/api/mockExams", mockExams);
+  app.use("/api/mockExamSubmissions", mockExamSubmissions);
 
   app.use("/api/parentProfiles", parentProfiles);
   app.use("/api/parentPortal", parentPortal);
