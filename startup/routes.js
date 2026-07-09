@@ -43,6 +43,9 @@ const forumTopics = require("../routes/forumTopics.js");
 const forumPosts = require("../routes/forumPosts.js");
 const mockExams = require("../routes/mockExams.js");
 const mockExamSubmissions = require("../routes/mockExamSubmissions.js");
+const corrections = require("../routes/corrections.js");
+const weakTopics = require("../routes/weakTopics.js");
+const revisionTasks = require("../routes/revisionTasks.js");
 const error = require("../middleware/error");
 
 
@@ -69,6 +72,7 @@ module.exports = function (app) {
   app.use("/api/certificates", certificates);
   app.use("/api/classes",classes);
   app.use("/api/communicationNotices" , communicationNotices);
+  app.use("/api/corrections", corrections);
 
   app.use("/api/forumTopics", forumTopics);
   app.use("/api/forumPosts", forumPosts);
@@ -94,6 +98,7 @@ module.exports = function (app) {
 
   app.use("/api/reportCards",reportCards);
   app.use("/api/results", results);
+  app.use("/api/revisionTasks", revisionTasks);
 
   app.use("/api/studentAnalytics",studentAnalytics);
   app.use("/api/schoolFees", schoolFees);
@@ -112,6 +117,8 @@ module.exports = function (app) {
   app.use("/api/users", users);
 
   app.use("/api/videos",videos);
+
+  app.use("/api/weakTopics",weakTopics);
   
   app.use(error);
 };

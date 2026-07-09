@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+const { generateWeakTopics } = require("../services/weakTopicService");
 const {
   MockExamSubmission,
   validate,
@@ -10,6 +11,8 @@ const { MockExam } = require("../models/mockExam");
 const { Question } = require("../models/question");
 const { User } = require("../models/user");
 const { Result } = require("../models/result");
+const { WeakTopic } = require("../models/weakTopic");
+
 
 function calculateGrade(percentage) {
   if (percentage >= 80) return "A";
@@ -155,6 +158,8 @@ router.post("/", async (req, res) => {
 
   await submission.save();
 
+  
+
   const result = new Result({
     student: req.body.student,
     subject: exam.subject,
@@ -167,11 +172,23 @@ router.post("/", async (req, res) => {
     teacherComment: "Mock exam result generated automatically.",
   });
 
-  await result.save();
+   await result.save();
+
+  const weakTopicReport = await generateWeakTopics({
+  student: req.body.student,
+  subject: exam.subject,
+  classId: exam.class,
+  sourceType: "MOCK_EXAM",
+  sourceId: submission._id,
+  answers: markedAnswers,
+});
+
+ 
 
   res.send({
     submission,
     result,
+     weakTopicReport,
   });
 });
 
