@@ -52,6 +52,8 @@ const intensiveRevisionPlans = require("../routes/intensiveRevisionPlans.js");
 const pastPaperPractice = require("../routes/pastPaperPractice.js");
 const parentDashboard = require("../routes/parentDashboard.js");
 const teacherDashboard = require("../routes/teacherDashboard.js");
+const subscriptions = require("../routes/subscriptions.js");
+const adminDashboard = require("../routes/adminDashboard.js");
 const error = require("../middleware/error");
 
 
@@ -71,6 +73,7 @@ module.exports = function (app) {
   app.use("/api/assignments", assignments);
   app.use("/api/announcements" , announcements);
   app.use("/api/attendances", attendances);
+  app.use("/api/adminDashboard", adminDashboard);
 
   app.use("/api/boards", boards);
   app.use("/api/badges", badges);
@@ -121,6 +124,7 @@ module.exports = function (app) {
   app.use("/api/syllabusTopics", syllabusTopics);
   app.use("/api/studentBadges", studentBadges);
   app.use("/api/studentDashboardProfiles", studentDashboardProfiles);
+  app.use("/api/subscriptions", subscriptions);
 
 
   app.use("/api/teacherProfiles" , teacherProfiles);

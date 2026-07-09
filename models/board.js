@@ -39,7 +39,8 @@ const boardSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Board = mongoose.model("Board", boardSchema);
+const Board =
+  mongoose.models.Board || mongoose.model("Board", boardSchema);
 
 function validateBoard(board) {
   const schema = Joi.object({
