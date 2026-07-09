@@ -1,86 +1,133 @@
 const express = require("express");
 const router = express.Router();
-const { Question, validateQuestion } = require("../models/Question");
-const { Subject } = require("../models/Subject");
-const { SyllabusTopic } = require("../models/SyllabusTopic");
 
+const {
+  Question,
+  validate,
+} = require("../models/question");
+
+const { PastPaper } = require("../models/pastPaper");
+const { Subject } = require("../models/subject");
+const { SyllabusTopic } = require("../models/syllabusTopic");
+
+// GET QUESTIONS
 router.get("/", async (req, res) => {
-  const filter = {};
-
-  if (req.query.subject_id) filter.subject_id = req.query.subject_id;
-  if (req.query.topic_id) filter.topic_id = req.query.topic_id;
-  if (req.query.question_type) filter.question_type = req.query.question_type;
-  if (req.query.difficulty) filter.difficulty = req.query.difficulty;
-  if (req.query.paper) filter.paper = req.query.paper;
-  if (req.query.approved) filter.approved = req.query.approved === "true";
-
-  const questions = await Question.find(filter)
-    .populate("subject_id", "name code level")
-    .populate("topic_id", "title")
-    .sort("-createdAt");
+  const questions = await Question.find()
+    .populate("pastPaper", "title year paperCode syllabus")
+    .populate("subject", "name code level category")
+    .populate("topic_id", "title name")
+    .sort("questionNumber");
 
   res.send(questions);
 });
 
+// FILTER QUESTIONS
+router.get("/filter", async (req, res) => {
+  const { pastPaper, subject, topic_id, difficulty, questionType } = req.query;
+
+  const filter = {};
+
+  if (pastPaper) filter.pastPaper = pastPaper;
+  if (subject) filter.subject = subject;
+  if (topic_id) filter.topic_id = topic_id;
+  if (difficulty) filter.difficulty = difficulty;
+  if (questionType) filter.questionType = questionType;
+
+  const questions = await Question.find(filter)
+    .populate("pastPaper", "title year paperCode syllabus")
+    .populate("subject", "name code level category")
+    .populate("topic_id", "title name")
+    .sort("questionNumber");
+
+  res.send(questions);
+});
+
+// GET SINGLE QUESTION
 router.get("/:id", async (req, res) => {
   const question = await Question.findById(req.params.id)
-    .populate("subject_id", "name code level")
-    .populate("topic_id", "title");
+    .populate("pastPaper", "title year paperCode syllabus")
+    .populate("subject", "name code level category")
+    .populate("topic_id", "title name");
 
-  if (!question) return res.status(404).send("Question not found.");
+  if (!question) return res.status(404).send(" question not found.");
 
   res.send(question);
 });
 
+// CREATE QUESTION
 router.post("/", async (req, res) => {
-  const { error } = validateQuestion(req.body);
+  const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const subject = await Subject.findById(req.body.subject_id);
-  if (!subject) return res.status(400).send("Invalid subject_id.");
+  const paper = await PastPaper.findById(req.body.pastPaper);
+  if (!paper) return res.status(400).send("Invalid past paper.");
+
+  const subject = await Subject.findById(req.body.subject);
+  if (!subject) return res.status(400).send("Invalid subject.");
 
   const topic = await SyllabusTopic.findById(req.body.topic_id);
-  if (!topic) return res.status(400).send("Invalid topic_id.");
+  if (!topic) return res.status(400).send("Invalid topic.");
 
-  const question = new Question(req.body);
-  await question.save();
-
-  res.status(201).send(question);
-});
-
-router.put("/:id", async (req, res) => {
-  const { error } = validateQuestion(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  const question = await Question.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
+  const question = new Question({
+    pastPaper: req.body.pastPaper,
+    subject: req.body.subject,
+    topic_id: req.body.topic_id,
+    questionNumber: req.body.questionNumber,
+    questionText: req.body.questionText,
+    questionType: req.body.questionType,
+    options: req.body.options,
+    correctAnswer: req.body.correctAnswer,
+    modelAnswer: req.body.modelAnswer,
+    explanation: req.body.explanation,
+    examinerComment: req.body.examinerComment,
+    commonMistakes: req.body.commonMistakes,
+    improvementTips: req.body.improvementTips,
+    marks: req.body.marks,
+    difficulty: req.body.difficulty,
   });
 
-  if (!question) return res.status(404).send("Question not found.");
+  await question.save();
 
   res.send(question);
 });
 
-router.patch("/:id/approve", async (req, res) => {
+// UPDATE QUESTION
+router.put("/:id", async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
   const question = await Question.findByIdAndUpdate(
     req.params.id,
-    { approved: true },
+    {
+      pastPaper: req.body.pastPaper,
+      subject: req.body.subject,
+      topic_id: req.body.topic_id,
+      questionNumber: req.body.questionNumber,
+      questionText: req.body.questionText,
+      questionType: req.body.questionType,
+      options: req.body.options,
+      correctAnswer: req.body.correctAnswer,
+      modelAnswer: req.body.modelAnswer,
+      explanation: req.body.explanation,
+      examinerComment: req.body.examinerComment,
+      commonMistakes: req.body.commonMistakes,
+      improvementTips: req.body.improvementTips,
+      marks: req.body.marks,
+      difficulty: req.body.difficulty,
+    },
     { new: true }
   );
 
-  if (!question) return res.status(404).send("Question not found.");
+  if (!question) return res.status(404).send(" question not found.");
 
   res.send(question);
 });
 
+// DELETE QUESTION
 router.delete("/:id", async (req, res) => {
-  const question = await Question.findByIdAndUpdate(
-    req.params.id,
-    { is_active: false },
-    { new: true }
-  );
+  const question = await Question.findByIdAndDelete(req.params.id);
 
-  if (!question) return res.status(404).send("Question not found.");
+  if (!question) return res.status(404).send(" question not found.");
 
   res.send(question);
 });

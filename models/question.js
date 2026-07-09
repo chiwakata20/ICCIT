@@ -1,9 +1,15 @@
 const mongoose = require("mongoose");
 const Joi = require("joi");
 
-const questionSchema = new mongoose.Schema(
+const QuestionSchema = new mongoose.Schema(
   {
-    subject_id: {
+    pastPaper: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PastPaper",
+      required: true,
+    },
+
+    subject: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subject",
       required: true,
@@ -15,124 +21,102 @@ const questionSchema = new mongoose.Schema(
       required: true,
     },
 
-    question_text: {
+    questionNumber: {
       type: String,
-      required: true,
-      minlength: 5,
-      maxlength: 3000,
-      trim: true,
-    },
-
-    question_type: {
-      type: String,
-      enum: ["MULTIPLE_CHOICE", "SHORT_ANSWER", "STRUCTURED", "ESSAY", "CALCULATION", "PRACTICAL"],
       required: true,
     },
 
-    options: [
-      {
-        label: {
-          type: String,
-          enum: ["A", "B", "C", "D", "E"],
-        },
-        text: {
-          type: String,
-          maxlength: 1000,
-        },
-      },
-    ],
-
-    correct_answer: {
+    questionText: {
       type: String,
-      maxlength: 2000,
-      trim: true,
+      required: true,
+      maxlength: 5000,
+    },
+
+    questionType: {
+      type: String,
+      enum: ["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER", "ESSAY", "STRUCTURED"],
+      required: true,
+    },
+
+    options: {
+      type: [String],
+      default: undefined,
+    },
+
+    correctAnswer: {
+      type: String,
+      maxlength: 5000,
+    },
+
+    modelAnswer: {
+      type: String,
+      maxlength: 10000,
     },
 
     explanation: {
       type: String,
+      maxlength: 10000,
+    },
+
+    examinerComment: {
+      type: String,
       maxlength: 3000,
-      trim: true,
+    },
+
+    commonMistakes: {
+      type: [String],
+      default: undefined,
+    },
+
+    improvementTips: {
+      type: [String],
+      default: undefined,
     },
 
     marks: {
       type: Number,
       required: true,
       min: 1,
-      max: 50,
     },
 
     difficulty: {
       type: String,
       enum: ["EASY", "MEDIUM", "HARD"],
-      default: "EASY",
-    },
-
-    paper: {
-      type: String,
-      enum: ["PAPER_1", "PAPER_2", "PAPER_3", "PAPER_4", "PRACTICAL", "ALL"],
-      default: "ALL",
-    },
-
-    approved: {
-      type: Boolean,
-      default: false,
-    },
-
-    is_active: {
-      type: Boolean,
-      default: true,
+      required: true,
     },
   },
   { timestamps: true }
 );
 
-questionSchema.index({ subject_id: 1, topic_id: 1, difficulty: 1 });
-
 const Question =
-  mongoose.models.Question || mongoose.model("Question", questionSchema);
+  mongoose.models.Question ||
+  mongoose.model("Question", QuestionSchema);
 
-function validateQuestion(question) {
+function validateQuestion(data) {
   const schema = Joi.object({
-    subject_id: Joi.string().hex().length(24).required(),
-
+    pastPaper: Joi.string().hex().length(24).required(),
+    subject: Joi.string().hex().length(24).required(),
     topic_id: Joi.string().hex().length(24).required(),
-
-    question_text: Joi.string().min(5).max(3000).required(),
-
-    question_type: Joi.string()
-      .valid("MULTIPLE_CHOICE", "SHORT_ANSWER", "STRUCTURED", "ESSAY", "CALCULATION", "PRACTICAL")
+    questionNumber: Joi.string().required(),
+    questionText: Joi.string().max(5000).required(),
+    questionType: Joi.string()
+      .valid("MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER", "ESSAY", "STRUCTURED")
       .required(),
-
-    options: Joi.array()
-      .items(
-        Joi.object({
-          label: Joi.string().valid("A", "B", "C", "D", "E").required(),
-          text: Joi.string().max(1000).required(),
-        })
-      )
-      .optional(),
-
-    correct_answer: Joi.string().max(2000).optional().allow(""),
-
-    explanation: Joi.string().max(3000).optional().allow(""),
-
-    marks: Joi.number().min(1).max(50).required(),
-
-    difficulty: Joi.string().valid("EASY", "MEDIUM", "HARD").optional(),
-
-    paper: Joi.string()
-      .valid("PAPER_1", "PAPER_2", "PAPER_3", "PAPER_4", "PRACTICAL", "ALL")
-      .optional(),
-
-    approved: Joi.boolean().optional(),
-
-    is_active: Joi.boolean().optional(),
+    options: Joi.array().items(Joi.string()).optional(),
+    correctAnswer: Joi.string().max(5000).optional().allow(""),
+    modelAnswer: Joi.string().max(10000).optional().allow(""),
+    explanation: Joi.string().max(10000).optional().allow(""),
+    examinerComment: Joi.string().max(3000).optional().allow(""),
+    commonMistakes: Joi.array().items(Joi.string()).optional(),
+    improvementTips: Joi.array().items(Joi.string()).optional(),
+    marks: Joi.number().min(1).required(),
+    difficulty: Joi.string().valid("EASY", "MEDIUM", "HARD").required(),
   });
 
-  return schema.validate(question);
+  return schema.validate(data);
 }
 
 module.exports = {
   Question,
-  validateQuestion,
+  validate: validateQuestion,
 };

@@ -3,68 +3,54 @@ const Joi = require("joi");
 
 const pastPaperSchema = new mongoose.Schema(
   {
-    subject_id: {
+    title: { type: String, required: true, minlength: 2, maxlength: 200 },
+
+    syllabus: {
+      type: String,
+      enum: ["ZIMSEC", "CAMBRIDGE"],
+      required: true,
+    },
+
+    subject: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subject",
       required: true,
     },
 
+    paperCode: {
+      type: String,
+      required: true,
+      maxlength: 50,
+    },
+
     year: {
       type: Number,
       required: true,
-      min: 2000,
-      max: 2100,
     },
 
-    exam_session: {
+    session: {
       type: String,
-      enum: ["JUNE", "NOVEMBER", "MARCH", "OCTOBER", "OTHER"],
-      required: true,
+      enum: ["JUNE", "NOVEMBER", "MARCH", "SPECIMEN", "OTHER"],
+      default: "OTHER",
     },
 
-    paper_number: {
+    difficulty: {
       type: String,
-      enum: ["PAPER_1", "PAPER_2", "PAPER_3", "PAPER_4", "PAPER_5", "PRACTICAL", "COURSEWORK"],
-      required: true,
+      enum: ["EASY", "MEDIUM", "HARD", "MIXED"],
+      default: "MIXED",
     },
 
-    paper_type: {
-      type: String,
-      enum: ["QUESTION_PAPER", "MARK_SCHEME", "INSERT", "SOURCE_BOOKLET", "EXAMINER_REPORT"],
-      required: true,
+    paperFile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attachment",
     },
 
-    title: {
-      type: String,
-      required: true,
-      maxlength: 200,
-      trim: true,
+    markingSchemeFile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attachment",
     },
 
-    file_url: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    duration_minutes: {
-      type: Number,
-      min: 10,
-      max: 300,
-    },
-
-    total_marks: {
-      type: Number,
-      min: 1,
-      max: 300,
-    },
-
-    approved: {
-      type: Boolean,
-      default: false,
-    },
-
-    is_active: {
+    is_published: {
       type: Boolean,
       default: true,
     },
@@ -72,51 +58,30 @@ const pastPaperSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-pastPaperSchema.index({
-  subject_id: 1,
-  year: 1,
-  exam_session: 1,
-  paper_number: 1,
-  paper_type: 1,
-});
+const PastPaper =
+  mongoose.models.PastPaper ||
+  mongoose.model("PastPaper", pastPaperSchema);
 
-const PastPaper = mongoose.model("PastPaper", pastPaperSchema);
-
-function validatePastPaper(paper) {
+function validatePastPaper(data) {
   const schema = Joi.object({
-    subject_id: Joi.string().hex().length(24).required(),
-
-    year: Joi.number().min(2000).max(2100).required(),
-
-    exam_session: Joi.string()
-      .valid("JUNE", "NOVEMBER", "MARCH", "OCTOBER", "OTHER")
-      .required(),
-
-    paper_number: Joi.string()
-      .valid("PAPER_1", "PAPER_2", "PAPER_3", "PAPER_4", "PAPER_5", "PRACTICAL", "COURSEWORK")
-      .required(),
-
-    paper_type: Joi.string()
-      .valid("QUESTION_PAPER", "MARK_SCHEME", "INSERT", "SOURCE_BOOKLET", "EXAMINER_REPORT")
-      .required(),
-
-    title: Joi.string().max(200).required(),
-
-    file_url: Joi.string().uri().required(),
-
-    duration_minutes: Joi.number().min(10).max(300).optional(),
-
-    total_marks: Joi.number().min(1).max(300).optional(),
-
-    approved: Joi.boolean().optional(),
-
-    is_active: Joi.boolean().optional(),
+    title: Joi.string().min(2).max(200).required(),
+    syllabus: Joi.string().valid("ZIMSEC", "CAMBRIDGE").required(),
+    subject: Joi.string().hex().length(24).required(),
+    paperCode: Joi.string().max(50).required(),
+    year: Joi.number().required(),
+    session: Joi.string()
+      .valid("JUNE", "NOVEMBER", "MARCH", "SPECIMEN", "OTHER")
+      .optional(),
+    difficulty: Joi.string().valid("EASY", "MEDIUM", "HARD", "MIXED").optional(),
+    paperFile: Joi.string().hex().length(24).optional().allow(""),
+    markingSchemeFile: Joi.string().hex().length(24).optional().allow(""),
+    is_published: Joi.boolean().optional(),
   });
 
-  return schema.validate(paper);
+  return schema.validate(data);
 }
 
 module.exports = {
   PastPaper,
-  validatePastPaper,
+  validate: validatePastPaper,
 };

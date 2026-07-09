@@ -1,66 +1,109 @@
 const express = require("express");
 const router = express.Router();
-const { PastPaper, validatePastPaper } = require("../models/PastPaper");
-const { Subject } = require("../models/Subject");
 
+const { PastPaper, validate } = require("../models/pastPaper");
+const { Subject } = require("../models/subject");
+const { Attachment } = require("../models/attachment");
+
+// GET ALL PAST PAPERS
 router.get("/", async (req, res) => {
-  const filter = {};
-
-  if (req.query.subject_id) filter.subject_id = req.query.subject_id;
-  if (req.query.year) filter.year = Number(req.query.year);
-  if (req.query.exam_session) filter.exam_session = req.query.exam_session;
-  if (req.query.paper_number) filter.paper_number = req.query.paper_number;
-  if (req.query.paper_type) filter.paper_type = req.query.paper_type;
-  if (req.query.approved) filter.approved = req.query.approved === "true";
-
-  const papers = await PastPaper.find(filter)
-    .populate("subject_id", "name code level")
-    .sort("-year exam_session paper_number");
+  const papers = await PastPaper.find()
+    .populate("subject", "name code level category")
+    .populate("paperFile", "originalName filePath fileType fileSize")
+    .populate("markingSchemeFile", "originalName filePath fileType fileSize")
+    .sort("-year");
 
   res.send(papers);
 });
 
+// SEARCH PAST PAPERS
+router.get("/search", async (req, res) => {
+  const { subject, year, syllabus, difficulty, paperCode } = req.query;
+
+  const filter = { is_published: true };
+
+  if (subject) filter.subject = subject;
+  if (year) filter.year = Number(year);
+  if (syllabus) filter.syllabus = syllabus;
+  if (difficulty) filter.difficulty = difficulty;
+  if (paperCode) filter.paperCode = paperCode;
+
+  const papers = await PastPaper.find(filter)
+    .populate("subject", "name code level category")
+    .populate("paperFile", "originalName filePath fileType fileSize")
+    .populate("markingSchemeFile", "originalName filePath fileType fileSize")
+    .sort("-year");
+
+  res.send(papers);
+});
+
+// GET SINGLE PAST PAPER
 router.get("/:id", async (req, res) => {
-  const paper = await PastPaper.findById(req.params.id).populate(
-    "subject_id",
-    "name code level"
-  );
+  const paper = await PastPaper.findById(req.params.id)
+    .populate("subject", "name code level category")
+    .populate("paperFile", "originalName filePath fileType fileSize")
+    .populate("markingSchemeFile", "originalName filePath fileType fileSize");
 
   if (!paper) return res.status(404).send("Past paper not found.");
 
   res.send(paper);
 });
 
+// CREATE PAST PAPER
 router.post("/", async (req, res) => {
-  const { error } = validatePastPaper(req.body);
+  const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const subject = await Subject.findById(req.body.subject_id);
-  if (!subject) return res.status(400).send("Invalid subject_id.");
+  const subject = await Subject.findById(req.body.subject);
+  if (!subject) return res.status(400).send("Invalid subject.");
 
-  const paper = new PastPaper(req.body);
-  await paper.save();
+  if (req.body.paperFile) {
+    const paperFile = await Attachment.findById(req.body.paperFile);
+    if (!paperFile) return res.status(400).send("Invalid paper file.");
+  }
 
-  res.status(201).send(paper);
-});
+  if (req.body.markingSchemeFile) {
+    const markingScheme = await Attachment.findById(req.body.markingSchemeFile);
+    if (!markingScheme) return res.status(400).send("Invalid marking scheme file.");
+  }
 
-router.put("/:id", async (req, res) => {
-  const { error } = validatePastPaper(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
-  const paper = await PastPaper.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
+  const paper = new PastPaper({
+    title: req.body.title,
+    syllabus: req.body.syllabus,
+    subject: req.body.subject,
+    paperCode: req.body.paperCode,
+    year: req.body.year,
+    session: req.body.session,
+    difficulty: req.body.difficulty,
+    paperFile: req.body.paperFile || undefined,
+    markingSchemeFile: req.body.markingSchemeFile || undefined,
+    is_published: req.body.is_published,
   });
 
-  if (!paper) return res.status(404).send("Past paper not found.");
+  await paper.save();
 
   res.send(paper);
 });
 
-router.patch("/:id/approve", async (req, res) => {
+// UPDATE PAST PAPER
+router.put("/:id", async (req, res) => {
+  const { error } = validate(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+
   const paper = await PastPaper.findByIdAndUpdate(
     req.params.id,
-    { approved: true },
+    {
+      title: req.body.title,
+      syllabus: req.body.syllabus,
+      subject: req.body.subject,
+      paperCode: req.body.paperCode,
+      year: req.body.year,
+      session: req.body.session,
+      difficulty: req.body.difficulty,
+      paperFile: req.body.paperFile || undefined,
+      markingSchemeFile: req.body.markingSchemeFile || undefined,
+      is_published: req.body.is_published,
+    },
     { new: true }
   );
 
@@ -69,12 +112,9 @@ router.patch("/:id/approve", async (req, res) => {
   res.send(paper);
 });
 
+// DELETE PAST PAPER
 router.delete("/:id", async (req, res) => {
-  const paper = await PastPaper.findByIdAndUpdate(
-    req.params.id,
-    { is_active: false },
-    { new: true }
-  );
+  const paper = await PastPaper.findByIdAndDelete(req.params.id);
 
   if (!paper) return res.status(404).send("Past paper not found.");
 

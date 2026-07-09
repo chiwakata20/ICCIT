@@ -73,7 +73,9 @@ const syllabusTopicSchema = new mongoose.Schema(
 
 syllabusTopicSchema.index({ subject_id: 1, order_number: 1 });
 
-const SyllabusTopic = mongoose.model("SyllabusTopic", syllabusTopicSchema);
+const SyllabusTopic =
+  mongoose.models.SyllabusTopic ||
+  mongoose.model("SyllabusTopic", syllabusTopicSchema);
 
 function validateSyllabusTopic(topic) {
   const schema = Joi.object({
