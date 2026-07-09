@@ -48,6 +48,7 @@ const weakTopics = require("../routes/weakTopics.js");
 const revisionTasks = require("../routes/revisionTasks.js");
 const examCountdowns = require("../routes/examCountdowns.js");
 const studentDashboardProfiles = require("../routes/studentDashboardProfiles.js");
+const intensiveRevisionPlans = require("../routes/intensiveRevisionPlans.js");
 const error = require("../middleware/error");
 
 
@@ -83,6 +84,8 @@ module.exports = function (app) {
 
   app.use("/api/homeworkSubmissions",homeworkSubmissions);
   app.use("/api/homeworks", homeworks);
+
+  app.use("/api/intensiveRevisionPlans", intensiveRevisionPlans);
 
   app.use("/api/lessons", lessons);
   app.use("/api/lessonNotes", lessonNotes);
