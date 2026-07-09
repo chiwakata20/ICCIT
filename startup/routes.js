@@ -50,6 +50,7 @@ const examCountdowns = require("../routes/examCountdowns.js");
 const studentDashboardProfiles = require("../routes/studentDashboardProfiles.js");
 const intensiveRevisionPlans = require("../routes/intensiveRevisionPlans.js");
 const pastPaperPractice = require("../routes/pastPaperPractice.js");
+const parentDashboard = require("../routes/parentDashboard.js");
 const error = require("../middleware/error");
 
 
@@ -101,6 +102,7 @@ module.exports = function (app) {
   app.use("/api/parentPortal", parentPortal);
   app.use("/api/pastPapers", pastPapers);
   app.use("/api/pastPaperPractice", pastPaperPractice);
+  app.use("/api/parentDashboard", parentDashboard);
 
   app.use("/api/questions", questions);
   app.use("/api/quizzes", quizzes); 

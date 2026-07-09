@@ -82,6 +82,15 @@ const revisionTaskSchema = new mongoose.Schema(
       default: "PENDING",
     },
 
+    estimatedMinutes: {
+      type: Number,
+      default: 0,
+    },
+    actualMinutesSpent: {
+      type: Number,
+      default: 0,
+    },
+
     completedAt: {
       type: Date,
     },
@@ -111,6 +120,8 @@ function validateRevisionTask(data) {
     weakTopicReport: Joi.string().hex().length(24).optional().allow(""),
     priority: Joi.string().valid("LOW", "NORMAL", "HIGH").optional(),
     status: Joi.string().valid("PENDING", "IN_PROGRESS", "COMPLETED", "SKIPPED").optional(),
+    estimatedMinutes: Joi.number().min(0).optional(),
+    actualMinutesSpent: Joi.number().min(0).optional(),
   });
 
   return schema.validate(data);
