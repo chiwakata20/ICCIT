@@ -46,6 +46,8 @@ const mockExamSubmissions = require("../routes/mockExamSubmissions.js");
 const corrections = require("../routes/corrections.js");
 const weakTopics = require("../routes/weakTopics.js");
 const revisionTasks = require("../routes/revisionTasks.js");
+const examCountdowns = require("../routes/examCountdowns.js");
+const studentDashboardProfiles = require("../routes/studentDashboardProfiles.js");
 const error = require("../middleware/error");
 
 
@@ -73,6 +75,8 @@ module.exports = function (app) {
   app.use("/api/classes",classes);
   app.use("/api/communicationNotices" , communicationNotices);
   app.use("/api/corrections", corrections);
+
+  app.use("/api/examCountdowns", examCountdowns);
 
   app.use("/api/forumTopics", forumTopics);
   app.use("/api/forumPosts", forumPosts);
@@ -108,6 +112,8 @@ module.exports = function (app) {
   app.use("/api/subjects", subjects);
   app.use("/api/syllabusTopics", syllabusTopics);
   app.use("/api/studentBadges", studentBadges);
+  app.use("/api/studentDashboardProfiles", studentDashboardProfiles);
+
 
   app.use("/api/teacherProfiles" , teacherProfiles);
   app.use("/api/resources", resources);
