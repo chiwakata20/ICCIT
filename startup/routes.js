@@ -51,6 +51,7 @@ const studentDashboardProfiles = require("../routes/studentDashboardProfiles.js"
 const intensiveRevisionPlans = require("../routes/intensiveRevisionPlans.js");
 const pastPaperPractice = require("../routes/pastPaperPractice.js");
 const parentDashboard = require("../routes/parentDashboard.js");
+const teacherDashboard = require("../routes/teacherDashboard.js");
 const error = require("../middleware/error");
 
 
@@ -126,6 +127,7 @@ module.exports = function (app) {
   app.use("/api/resources", resources);
   app.use("/api/teacherComments", teacherComments);
   app.use("/api/timeTables", timeTables);
+  app.use("/api/teacherDashboard", teacherDashboard);
 
   app.use("/api/users", users);
 
