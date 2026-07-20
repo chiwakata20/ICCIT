@@ -3,8 +3,8 @@ const router = express.Router();
 const {
   SyllabusTopic,
   validateSyllabusTopic,
-} = require("../models/SyllabusTopic");
-const { Subject } = require("../models/Subject");
+} = require("../models/syllabusTopic");
+const { Subject } = require("../models/subject");
 
 router.get("/", async (req, res) => {
   const filter = {};
