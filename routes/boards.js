@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Board, validateBoard } = require("../models/Board");
+const { Board, validateBoard } = require("../models/board");
 
 router.get("/", async (req, res) => {
   const boards = await Board.find().sort("name");
