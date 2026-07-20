@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
+
 const { Subject, validateSubject } = require("../models/subject");
-const { Board } = require("../models/Board");
+const { Board } = require("../models/board");
 
 router.get("/", async (req, res) => {
   const filter = {};
