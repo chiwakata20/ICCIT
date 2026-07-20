@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Subject, validateSubject } = require("../models/Subject");
+const { Subject, validateSubject } = require("../models/subject");
 const { Board } = require("../models/Board");
 
 router.get("/", async (req, res) => {
