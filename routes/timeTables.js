@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { Timetable, validate } = require("../models/timetable");
+const { Timetable, validate } = require("../models/timeTable");
 const { Class } = require("../models/class");
 const { Subject } = require("../models/subject");
 const { User } = require("../models/user");
