@@ -13,9 +13,9 @@ const mongoose = require("mongoose");
 const app = express();
 
 
-databasePromise.catch((error) => {
-  console.error("MongoDB startup error:", error.message);
-});
+// databasePromise.catch((error) => {
+//   console.error("MongoDB startup error:", error.message);
+// });
 
 console.log(
   "MONGODB_URI configured:",
