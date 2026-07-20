@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { Resource, validateResource } = require("../models/Resource");
-const { Subject } = require("../models/Subject");
-const { SyllabusTopic } = require("../models/SyllabusTopic");
+const { Resource, validateResource } = require("../models/resource");
+const { Subject } = require("../models/subject");
+const { SyllabusTopic } = require("../models/syllabusTopic");
 
 router.get("/", async (req, res) => {
   const filter = {};

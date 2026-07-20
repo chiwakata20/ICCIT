@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   StudentProgress,
   validateStudentProgress,
-} = require("../models/StudentProgress");
+} = require("../models/studentProgress");
 
 router.get("/", async (req, res) => {
   const filter = {};
