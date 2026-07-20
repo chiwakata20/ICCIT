@@ -26,9 +26,15 @@ module.exports = function connectDatabase() {
       })
       .catch((error) => {
         connectionPromise = null;
-        console.error("MongoDB connection failed:", error.message);
-        throw error;
-      });
+
+  console.error("MongoDB connection failed:", {
+    name: error.name,
+    message: error.message,
+    code: error.code
+  });
+
+  throw error;
+});
   }
 
   return connectionPromise;
