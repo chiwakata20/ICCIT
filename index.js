@@ -1,7 +1,4 @@
 const path = require("path");
-const databasePromise = require("./startup/db")();
-
-
 
 require("dotenv").config({
   path: path.resolve(__dirname, ".env")
@@ -12,28 +9,23 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-
-// databasePromise.catch((error) => {
-//   console.error("MongoDB startup error:", error.message);
-// });
-
 console.log(
   "MONGODB_URI configured:",
   Boolean(process.env.MONGODB_URI)
 );
 
-// Check configuration before initializing the database.
+// Initialize application configuration.
 require("./startup/config")();
 require("./startup/validation")();
-require("./startup/routes")(app);
-require("./startup/prod")(app);
 
+// Initialize MongoDB only once.
 const databasePromise = require("./startup/db")();
 
 databasePromise.catch((error) => {
   console.error("MongoDB startup error:", error.message);
 });
 
+// Health routes should be registered before any 404 middleware.
 app.get("/", async (req, res) => {
   try {
     await databasePromise;
@@ -72,6 +64,11 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+// Register application routes and production middleware.
+require("./startup/routes")(app);
+require("./startup/prod")(app);
+
+// Only open a port during local development.
 if (require.main === module) {
   const port = process.env.PORT || 3000;
 
@@ -80,4 +77,5 @@ if (require.main === module) {
   });
 }
 
+// Vercel uses this exported Express application.
 module.exports = app;
