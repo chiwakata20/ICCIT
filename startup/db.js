@@ -25,13 +25,24 @@ module.exports = function connectDatabase() {
         return mongoose.connection;
       })
       .catch((error) => {
-        connectionPromise = null;
+  connectionPromise = null;
 
   console.error("MongoDB connection failed:", {
     name: error.name,
     message: error.message,
     code: error.code
   });
+
+  if (error.reason && error.reason.servers) {
+    for (const [address, server] of error.reason.servers.entries()) {
+      console.error("MongoDB server error:", {
+        address,
+        type: server.type,
+        message: server.error?.message,
+        code: server.error?.code
+      });
+    }
+  }
 
   throw error;
 });
